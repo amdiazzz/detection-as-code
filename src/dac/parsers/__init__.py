@@ -14,6 +14,7 @@ from typing import Any
 
 from ..errors import ParserError
 from .dnsmasq import parse_dnsmasq
+from .pvedaemon import parse_pvedaemon
 from .sshd import parse_sshd
 from .weblog import parse_weblog
 
@@ -23,6 +24,7 @@ Parser = Callable[[str], dict[str, Any] | None]
 PARSERS: dict[str, Parser] = {
     "sshd": parse_sshd,
     "dnsmasq": parse_dnsmasq,
+    "pvedaemon": parse_pvedaemon,
     "weblog": parse_weblog,
 }
 

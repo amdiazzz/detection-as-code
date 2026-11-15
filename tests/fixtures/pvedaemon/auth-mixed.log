@@ -1,0 +1,9 @@
+Nov 14 09:10:02 cs101 pvedaemon[1601]: <root@pam> successful auth for user 'alexdiaz@pve'
+Nov 14 09:12:03 cs101 pvedaemon[1601]: authentication failure; rhost=::ffff:10.0.1.26 user=root@pam msg=Authentication failure
+Nov 14 09:12:05 cs101 IPCC.xs[1602]: pam_unix(proxmox-ve-auth:auth): authentication failure; logname= uid=0 euid=0 tty= ruser= rhost=::ffff:10.0.1.26  user=root
+Nov 14 09:12:11 cs101 pvedaemon[1601]: authentication failure; rhost=::ffff:10.0.1.26 user=root@pam msg=Authentication failure
+Nov 14 09:12:19 cs101 pvedaemon[1601]: <root@pam> successful auth for user 'root@pam'
+Nov 14 09:14:00 cs101 pvedaemon[1601]: Cluster not quorate - extending auth key lifetime!
+Nov 14 09:15:40 cs101 pvedaemon[1601]: <root@pam> starting task UPID:cs101:0002F3A1:15AA4C22:qmcreate:101:root@pam:
+Nov 14 09:20:01 cs101 pvedaemon[1601]: authentication failure; rhost=::ffff:10.0.1.26 user=root@pam msg=cfs-lock 'authkey' error: got lock request timeout
+Nov 14 09:31:17 cs101 pvedaemon[1601]: <root@pam> successful auth for user 'alexdiaz@pve'

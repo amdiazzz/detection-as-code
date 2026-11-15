@@ -7,7 +7,14 @@ from datetime import datetime
 import pytest
 
 from dac.errors import ParserError
-from dac.parsers import get_parser, parse_dnsmasq, parse_lines, parse_sshd, parse_weblog
+from dac.parsers import (
+    get_parser,
+    parse_dnsmasq,
+    parse_lines,
+    parse_pvedaemon,
+    parse_sshd,
+    parse_weblog,
+)
 
 
 class TestSshd:
@@ -145,7 +152,7 @@ class TestWeblog:
 
 class TestRegistry:
     def test_unknown_parser_name_lists_valid_options(self) -> None:
-        with pytest.raises(ParserError, match="available: dnsmasq, sshd, weblog"):
+        with pytest.raises(ParserError, match="available: dnsmasq, pvedaemon, sshd, weblog"):
             get_parser("nope")
 
     def test_parse_lines_skips_blanks_and_unmatched(self) -> None:
@@ -156,3 +163,143 @@ class TestRegistry:
             "Nov 14 03:11:11 c sshd[1]: Failed password for root from 1.2.3.4 port 1 ssh2",
         ]
         assert len(list(parse_lines("sshd", lines))) == 1
+
+
+class TestPvedaemon:
+    """Line formats here are taken from published Proxmox output, not invented.
+
+    Sources are listed in tests/fixtures/README.md.
+    """
+
+    def test_failure_fields(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[1885456]: authentication failure; "
+            "rhost=::ffff:10.0.1.26 user=root@pam msg=Authentication failure",
+            year=2026,
+        )
+        assert event is not None
+        assert event["auth_result"] == "failure"
+        assert event["user"] == "root@pam"
+        assert event["user_name"] == "root"
+        assert event["realm"] == "pam"
+        assert event["msg"] == "Authentication failure"
+        assert event["failure_reason"] == "credentials"
+        assert event["service"] == "pvedaemon"
+        assert event["product"] == "proxmox"
+        assert event["timestamp"] == datetime(2026, 11, 14, 9, 12, 3)
+
+    def test_ipv4_mapped_ipv6_rhost_is_unwrapped(self) -> None:
+        """Without unwrapping, a cidr rule against 10.0.0.0/8 never matches."""
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=::ffff:10.0.1.26 user=root@pam msg=Authentication failure"
+        )
+        assert event["src_ip"] == "10.0.1.26"
+        assert event["src_ip_raw"] == "::ffff:10.0.1.26"
+
+    def test_plain_ipv4_rhost_is_preserved(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=203.0.113.9 user=root@pam msg=Authentication failure"
+        )
+        assert event["src_ip"] == "203.0.113.9"
+
+    def test_genuine_ipv6_rhost_is_preserved(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=2001:db8::5 user=root@pam msg=Authentication failure"
+        )
+        assert event["src_ip"] == "2001:db8::5"
+
+    def test_unparseable_rhost_yields_none_not_a_crash(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=garbage user=root@pam msg=Authentication failure"
+        )
+        assert event["src_ip"] is None
+        assert event["src_ip_raw"] == "garbage"
+
+    def test_no_such_user_is_a_credential_failure(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=::ffff:203.0.113.9 user=test@pam msg=no such user ('test@pam')"
+        )
+        assert event["failure_reason"] == "credentials"
+
+    def test_cluster_lock_error_is_not_a_credential_failure(self) -> None:
+        """Proxmox reuses the 'authentication failure' prefix for host faults.
+
+        A brute-force rule keyed on the prefix alone would fire on cluster lock
+        contention, which is an availability problem and not an attack.
+        """
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=::ffff:10.0.1.26 user=root@pam "
+            "msg=cfs-lock 'authkey' error: got lock request timeout"
+        )
+        assert event["auth_result"] == "failure"
+        assert event["failure_reason"] == "server_error"
+
+    def test_success_fields(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:15:40 cs101 pvedaemon[2832]: <root@pam> successful auth "
+            "for user 'alexdiaz@pve'"
+        )
+        assert event["auth_result"] == "success"
+        assert event["user"] == "alexdiaz@pve"
+        assert event["realm"] == "pve"
+        assert event["acting_user"] == "root@pam"
+
+    def test_success_carries_no_source_address(self) -> None:
+        """Documented limitation: the success line has no rhost field."""
+        event = parse_pvedaemon(
+            "Nov 14 09:15:40 cs101 pvedaemon[2832]: <root@pam> successful auth for user 'root@pam'"
+        )
+        assert "src_ip" not in event
+
+    def test_user_without_a_realm(self) -> None:
+        event = parse_pvedaemon(
+            "Nov 14 09:12:03 cs101 pvedaemon[101]: authentication failure; "
+            "rhost=::ffff:10.0.1.26 user=root msg=Authentication failure"
+        )
+        assert event["user_name"] == "root"
+        assert event["realm"] is None
+
+    def test_non_auth_pvedaemon_chatter_is_dropped(self) -> None:
+        assert (
+            parse_pvedaemon(
+                "Nov 14 09:12:03 cs101 pvedaemon[101]: <root@pam> starting task "
+                "UPID:cs101:0002F:15AA4:qmcreate:101:root@pam:"
+            )
+            is None
+        )
+        assert (
+            parse_pvedaemon(
+                "Nov 14 09:12:03 cs101 pvedaemon[101]: Cluster not quorate - "
+                "extending auth key lifetime!"
+            )
+            is None
+        )
+
+    def test_neighbouring_pam_line_is_ignored(self) -> None:
+        """IPCC.xs logs its own pam_unix failure for the same login attempt."""
+        assert (
+            parse_pvedaemon(
+                "Nov 14 09:12:03 cs101 IPCC.xs[4160338]: pam_unix(proxmox-ve-auth:auth): "
+                "authentication failure; logname= uid=0 euid=0 tty= ruser= "
+                "rhost=::ffff:10.0.1.26  user=root"
+            )
+            is None
+        )
+
+    def test_sshd_line_is_ignored(self) -> None:
+        assert (
+            parse_pvedaemon(
+                "Nov 14 03:11:11 cs101 sshd[2211]: Failed password for root "
+                "from 203.0.113.37 port 51200 ssh2"
+            )
+            is None
+        )
+
+    def test_garbage_line_is_ignored(self) -> None:
+        assert parse_pvedaemon("total garbage") is None

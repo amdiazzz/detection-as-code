@@ -9,7 +9,7 @@ authors = [{ name = "Alex Diaz" }]
 dependencies = ["pyyaml>=6.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.6", "bandit>=1.7"]
+dev = ["pytest>=8.0", "pytest-cov>=7.1.0", "ruff>=0.6", "bandit>=1.7"]
 
 [project.scripts]
 dac = "dac.cli:main"

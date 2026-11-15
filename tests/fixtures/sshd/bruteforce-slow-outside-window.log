@@ -1,0 +1,6 @@
+Nov 14 05:00:05 cs101 sshd[4401]: Failed password for root from 203.0.113.44 port 53000 ssh2
+Nov 14 05:07:05 cs101 sshd[4402]: Failed password for admin from 203.0.113.44 port 53001 ssh2
+Nov 14 05:14:05 cs101 sshd[4403]: Failed password for oracle from 203.0.113.44 port 53002 ssh2
+Nov 14 05:21:05 cs101 sshd[4404]: Failed password for ubuntu from 203.0.113.44 port 53003 ssh2
+Nov 14 05:28:05 cs101 sshd[4405]: Failed password for postgres from 203.0.113.44 port 53004 ssh2
+Nov 14 05:35:05 cs101 sshd[4406]: Failed password for git from 203.0.113.44 port 53005 ssh2

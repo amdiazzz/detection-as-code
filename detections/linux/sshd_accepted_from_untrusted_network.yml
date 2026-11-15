@@ -1,0 +1,40 @@
+title: SSH Login Accepted From Untrusted Network
+id: 97391cb8-6789-4f9b-9ba7-dd1caf2f1fc1
+status: experimental
+description: |
+  A successful SSH authentication from a source outside the homelab's trusted
+  address space (RFC1918 ranges, loopback, and the Tailscale CGNAT range).
+  Every legitimate administrative session arrives over the LAN or the overlay
+  mesh, so a success from anywhere else means either SSH is exposed to the
+  internet or an attacker is already inside the perimeter.
+references:
+  - https://attack.mitre.org/techniques/T1078/
+author: Alex Diaz
+date: 2026/11/14
+modified: 2026/11/14
+tags:
+  - attack.initial_access
+  - attack.persistence
+  - attack.t1078
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    auth_result: success
+  trusted_source:
+    src_ip|cidr:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 100.64.0.0/10
+      - 127.0.0.0/8
+  condition: selection and not trusted_source
+fields:
+  - src_ip
+  - user
+  - auth_method
+falsepositives:
+  - Deliberate remote administration from a coffee-shop or mobile network
+  - A new VPN or overlay range that has not been added to trusted_source
+level: high

@@ -1,0 +1,16 @@
+rule: detections/linux/sshd_accepted_from_untrusted_network.yml
+parser: sshd
+true_positives:
+  - name: success from a public address
+    line: "Nov 14 09:00:00 cs101 sshd[7000]: Accepted password for alexdiaz from 203.0.113.37 port 51400 ssh2"
+  - name: success from a public address by publickey
+    line: "Nov 14 09:01:00 cs101 sshd[7001]: Accepted publickey for root from 192.0.2.55 port 51401 ssh2"
+true_negatives:
+  - name: success over the LAN
+    line: "Nov 14 06:01:12 cs101 sshd[5501]: Accepted publickey for alexdiaz from 10.0.1.26 port 49600 ssh2"
+  - name: success over the Tailscale CGNAT range
+    line: "Nov 14 06:09:03 cs101 sshd[5520]: Accepted publickey for alexdiaz from 100.96.14.7 port 41022 ssh2"
+  - name: success from 192.168 range
+    line: "Nov 14 06:10:03 cs101 sshd[5521]: Accepted publickey for alexdiaz from 192.168.8.1 port 41023 ssh2"
+  - name: a failure from a public address is not a successful login
+    line: "Nov 14 03:11:11 cs101 sshd[2211]: Failed password for root from 203.0.113.37 port 51200 ssh2"

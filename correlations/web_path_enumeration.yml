@@ -1,0 +1,32 @@
+title: HTTP Path Enumeration From Single Source
+id: d43b2560-8665-4544-9c66-7541955f9547
+status: experimental
+description: |
+  One source requested five or more distinct suspicious paths within a minute,
+  which is the signature of an automated scanner working through a wordlist.
+
+  This is a value_count rather than an event_count correlation because the
+  distinguishing feature of enumeration is breadth, not volume. A client
+  retrying one broken path a hundred times is a bug; a client trying five
+  different paths once each is a scan.
+references:
+  - https://attack.mitre.org/techniques/T1595/003/
+author: Alex Diaz
+date: 2026/11/14
+modified: 2026/11/14
+tags:
+  - attack.reconnaissance
+  - attack.t1595.003
+correlation:
+  type: value_count
+  rules:
+    - 43103f96-d6f3-4a55-afa9-f14a3278c69c
+  group-by:
+    - src_ip
+  field: uri_path
+  timespan: 1m
+  condition:
+    gte: 5
+falsepositives:
+  - An authorised scan from a known scanner address
+level: medium

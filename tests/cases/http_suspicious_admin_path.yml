@@ -1,0 +1,20 @@
+rule: detections/web/http_suspicious_admin_path.yml
+parser: weblog
+true_positives:
+  - name: WordPress login probe
+    line: '{"ts": "2026-11-15T04:10:03Z", "remote": "198.51.100.22", "method": "GET", "path": "/wp-login.php", "status": 404, "ms": 0.4}'
+  - name: dotenv secret grab
+    line: '{"ts": "2026-11-15T04:10:09Z", "remote": "198.51.100.22", "method": "GET", "path": "/.env", "status": 404, "ms": 0.4}'
+  - name: git config exposure attempt
+    line: '{"ts": "2026-11-15T04:10:15Z", "remote": "198.51.100.22", "method": "GET", "path": "/.git/config", "status": 403, "ms": 0.4}'
+true_negatives:
+  - name: a real API 404 from the LAN
+    line: '{"ts": "2026-11-15T03:54:06Z", "remote": "10.0.20.235", "method": "GET", "path": "/api/session/anchor-scene", "status": 404, "ms": 0.5}'
+  - name: an ordinary successful request
+    line: '{"ts": "2026-11-15T03:54:07Z", "remote": "10.0.20.235", "method": "GET", "path": "/api/models", "status": 200, "ms": 0.7}'
+  - name: a suspicious path that actually succeeded is out of scope for this rule
+    line: '{"ts": "2026-11-15T04:11:00Z", "remote": "198.51.100.22", "method": "GET", "path": "/.env", "status": 200, "ms": 1.2}'
+  - name: a non-JSON line is not an event
+    line: "this is not json at all"
+true_negative_fixtures:
+  - weblog/webui-benign-real.log

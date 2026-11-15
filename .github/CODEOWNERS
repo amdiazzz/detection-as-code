@@ -1,0 +1,8 @@
+# Every change needs an owner review. Detection content and the engine are
+# called out separately so the intent survives adding collaborators later.
+
+*                   @amdiazzz
+/detections/        @amdiazzz
+/correlations/      @amdiazzz
+/src/dac/           @amdiazzz
+/.github/workflows/ @amdiazzz

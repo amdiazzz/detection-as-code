@@ -1,0 +1,46 @@
+title: DNS Query to High-Risk TLD
+id: 87be0861-72c0-46f8-ba05-a2516ac0a8a4
+status: experimental
+description: |
+  A client resolved a name under a top-level domain with a disproportionate
+  share of abuse and near-zero legitimate use on this network. The .zip and
+  .mov TLDs are called out specifically because they collide with common file
+  extensions, which makes them effective in phishing lures.
+
+  This is a heuristic, not an indicator of compromise. It is intended as a
+  triage signal pointing at a client worth inspecting.
+references:
+  - https://attack.mitre.org/techniques/T1071/004/
+  - https://www.spamhaus.org/statistics/tlds/
+author: Alex Diaz
+date: 2026/11/14
+modified: 2026/11/14
+tags:
+  - attack.command_and_control
+  - attack.t1071.004
+logsource:
+  product: linux
+  service: dnsmasq
+  category: dns
+detection:
+  selection:
+    action: query
+  risky_tld:
+    tld:
+      - zip
+      - mov
+      - top
+      - xyz
+      - cfd
+      - rest
+      - sbs
+      - click
+  condition: selection and risky_tld
+fields:
+  - src_ip
+  - query
+  - tld
+falsepositives:
+  - A legitimate service genuinely hosted on one of these TLDs
+  - Ad and telemetry domains already handled by the Pi-hole blocklists
+level: medium

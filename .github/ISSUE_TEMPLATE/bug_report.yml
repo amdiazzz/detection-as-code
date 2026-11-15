@@ -1,0 +1,42 @@
+name: Bug report
+description: Something in the engine, parsers, or tooling is broken
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Exact command, plus the log line if a parser is involved.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        A parser crash or hang on malformed input is a **security** issue --
+        it can be used to blind the pipeline. Please report it privately
+        instead: see SECURITY.md.

@@ -1,0 +1,9 @@
+Nov 14 07:00:01 pihole dnsmasq[912]: query[A] github.com from 10.0.1.26
+Nov 14 07:00:01 pihole dnsmasq[912]: reply github.com is 140.82.113.3
+Nov 14 07:00:04 pihole dnsmasq[912]: query[A] invoice-update.zip from 10.0.1.26
+Nov 14 07:00:04 pihole dnsmasq[912]: reply invoice-update.zip is 192.0.2.77
+Nov 14 07:00:09 pihole dnsmasq[912]: query[AAAA] cdn.jsdelivr.net from 10.0.20.250
+Nov 14 07:00:15 pihole dnsmasq[912]: query[A] telemetry.example.xyz from 10.0.1.26
+Nov 14 07:00:16 pihole dnsmasq[912]: gravity blocked doubleclick.net is 0.0.0.0
+Nov 14 07:00:22 pihole dnsmasq[912]: query[A] proxmox.lan from 10.0.20.235
+Nov 14 07:00:30 pihole dnsmasq[912]: cached raw.githubusercontent.com is 185.199.108.133

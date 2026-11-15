@@ -1,0 +1,54 @@
+name: False positive
+description: A rule fired on benign activity
+title: "fp: "
+labels: [false-positive, detection]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule title or UUID
+    validations:
+      required: true
+
+  - type: textarea
+    id: alert
+    attributes:
+      label: The alert
+      description: Output of `dac scan ... -f json`, sanitised.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: benign
+    attributes:
+      label: Why this was benign
+    validations:
+      required: true
+
+  - type: input
+    id: frequency
+    attributes:
+      label: How often does this fire?
+      placeholder: Roughly 20 times a day, every weekday morning
+    validations:
+      required: true
+
+  - type: dropdown
+    id: fix
+    attributes:
+      label: Suggested fix
+      options:
+        - Narrow the rule
+        - Raise the correlation threshold
+        - Add an exclusion for a specific source
+        - Demote severity and correlate instead
+        - Not sure
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        A fix must come with a new **true negative** case reproducing this
+        benign activity, so the false positive cannot silently return.

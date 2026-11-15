@@ -1,0 +1,81 @@
+name: Detection request
+description: Propose a new detection or correlation rule
+title: "detect: "
+labels: [detection, enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the behaviour to detect before writing any YAML. If the
+        false-positive section is hard to fill in, the rule is not ready.
+
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Behaviour to detect
+      description: What is the attacker doing, and what does it look like in logs?
+      placeholder: Repeated failed SSH password authentication from a single source.
+    validations:
+      required: true
+
+  - type: input
+    id: technique
+    attributes:
+      label: MITRE ATT&CK technique
+      placeholder: T1110.001 (Password Guessing)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: logsource
+    attributes:
+      label: Log source
+      options:
+        - sshd (auth.log)
+        - dnsmasq / Pi-hole
+        - HTTP access log (JSON)
+        - Proxmox
+        - Other (describe below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample log lines
+      description: Real lines if you have them. Sanitise before pasting.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: negatives
+    attributes:
+      label: Near-miss lines that must NOT fire
+      description: The most valuable part of the request. Lines that almost match.
+      render: text
+    validations:
+      required: true
+
+  - type: dropdown
+    id: level
+    attributes:
+      label: Proposed severity
+      options: [informational, low, medium, high, critical]
+    validations:
+      required: true
+
+  - type: textarea
+    id: falsepositives
+    attributes:
+      label: Expected false positives
+      description: What benign activity looks like this? Roughly how often?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: correlation
+    attributes:
+      label: Volume
+      options:
+        - label: This will be noisy on its own and should be a building block for a correlation rule

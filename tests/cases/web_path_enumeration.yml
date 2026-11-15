@@ -1,0 +1,14 @@
+rule: correlations/web_path_enumeration.yml
+parser: weblog
+supporting_rules:
+  - detections/web/http_suspicious_admin_path.yml
+scenarios:
+  - name: six distinct scanner paths in a minute fires once
+    fixture: weblog/scanner-path-enumeration.log
+    expect_alerts: 1
+  - name: three distinct paths stay below the threshold
+    fixture: weblog/scanner-below-threshold.log
+    expect_alerts: 0
+  - name: real WebUI traffic produces no enumeration alert
+    fixture: weblog/webui-benign-real.log
+    expect_alerts: 0

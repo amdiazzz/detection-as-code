@@ -1,0 +1,51 @@
+title: HTTP Request to Suspicious Admin or Secret Path
+id: 43103f96-d6f3-4a55-afa9-f14a3278c69c
+status: experimental
+description: |
+  A failed HTTP request for a path associated with opportunistic scanning:
+  WordPress endpoints, exposed .env or .git directories, phpMyAdmin, and
+  Spring actuator routes. None of these exist on this estate, so a request for
+  one is either a scanner or a human probing the service.
+
+  The status filter is what keeps this quiet: a 200 on these paths would be a
+  far more serious finding and is intentionally out of scope here, because it
+  warrants a separate critical-severity rule rather than being folded in.
+references:
+  - https://attack.mitre.org/techniques/T1595/003/
+author: Alex Diaz
+date: 2026/11/14
+modified: 2026/11/14
+tags:
+  - attack.reconnaissance
+  - attack.t1595.003
+logsource:
+  category: webserver
+detection:
+  selection:
+    category: webserver
+  suspicious_path:
+    uri_path|contains:
+      - /wp-login
+      - /wp-admin
+      - /wp-includes
+      - /.env
+      - /.git/
+      - /phpmyadmin
+      - /actuator
+      - /cgi-bin/
+      - /.aws/
+      - /vendor/phpunit
+  failed_request:
+    status_code:
+      - 401
+      - 403
+      - 404
+  condition: selection and suspicious_path and failed_request
+fields:
+  - src_ip
+  - uri_path
+  - status_code
+falsepositives:
+  - An authorised vulnerability scan or pentest engagement
+  - A security researcher probing a deliberately exposed honeypot path
+level: medium

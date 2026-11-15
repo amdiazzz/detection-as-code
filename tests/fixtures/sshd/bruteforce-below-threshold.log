@@ -1,0 +1,4 @@
+Nov 14 04:00:01 cs101 sshd[3300]: Server listening on 0.0.0.0 port 22.
+Nov 14 04:00:10 cs101 sshd[3301]: Failed password for root from 203.0.113.90 port 52000 ssh2
+Nov 14 04:00:40 cs101 sshd[3302]: Failed password for admin from 203.0.113.90 port 52001 ssh2
+Nov 14 04:01:10 cs101 sshd[3303]: Failed password for test from 203.0.113.90 port 52002 ssh2

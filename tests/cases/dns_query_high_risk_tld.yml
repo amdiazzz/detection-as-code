@@ -1,0 +1,16 @@
+rule: detections/network/dns_query_high_risk_tld.yml
+parser: dnsmasq
+true_positives:
+  - name: a .zip lure domain
+    line: "Nov 14 07:00:04 pihole dnsmasq[912]: query[A] invoice-update.zip from 10.0.1.26"
+  - name: a .xyz subdomain
+    line: "Nov 14 07:00:15 pihole dnsmasq[912]: query[A] telemetry.example.xyz from 10.0.1.26"
+true_negatives:
+  - name: an ordinary .com lookup
+    line: "Nov 14 07:00:01 pihole dnsmasq[912]: query[A] github.com from 10.0.1.26"
+  - name: a reply is not a query
+    line: "Nov 14 07:00:04 pihole dnsmasq[912]: reply invoice-update.zip is 192.0.2.77"
+  - name: a .lan internal name
+    line: "Nov 14 07:00:22 pihole dnsmasq[912]: query[A] proxmox.lan from 10.0.20.235"
+  - name: a domain merely containing zip is not under the zip TLD
+    line: "Nov 14 07:00:44 pihole dnsmasq[912]: query[A] zipfile.example.com from 10.0.1.26"

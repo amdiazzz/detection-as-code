@@ -46,7 +46,7 @@ Sources:
   (`cfs-lock` failure reason)
 
 These should still be replaced with a sanitised capture from CS101 when one is
-available; see issue #23.
+available; see issue #24.
 
 ## Address ranges
 
